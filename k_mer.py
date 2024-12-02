@@ -10,7 +10,12 @@ def generate_kmers(line, k=3):
     return kmers
 
 if __name__ == "__main__":
-    conf = SparkConf().setMaster("local[2]").setAppName("K-mer Count")
+    # "local[2] = 2 threads to be used for local execution"
+    # "StreamingContext(sc, 10) = 10 is the batch interval in seconds"
+    # DS stream is created from the socket on localhost:9999
+    # k mer of length 3 is generated from each line
+    
+    conf = SparkConf().setMaster("local[2]").setAppName("K-mer Count App")
     sc = SparkContext(conf=conf)
     ssc = StreamingContext(sc, 10)
 
@@ -21,7 +26,6 @@ if __name__ == "__main__":
     kmer_counts = kmers.map(lambda kmer: (kmer, 1)).reduceByKey(lambda a, b: a + b)
 
     kmer_counts.pprint()
-    print("`kmer_counts` is a DStream object of type `TransformedDStream`")
 
     ssc.start()
     ssc.awaitTermination()
